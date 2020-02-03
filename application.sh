@@ -22,17 +22,27 @@ EOF
 
 # Start all services on the beer tap device
 app_start(){
-	JAR=${BRIDGE_JARPATH}${BRIDGE_JARFILE}
+  source ${DIR}/backend-config.sh
+
+	BRIDGE_JAR=${DIR}/${BRIDGE_JARPATH}${BRIDGE_JARFILE}
+	BACKEND_JAR=${DIR}/${BACKEND_JARPATH}${BACKEND_JARFILE}
+	echo "${BRIDGE_JAR}"
+	echo "${BACKEND_JAR}"
 	# Check if the websocket bridge has been built
-	if [ ! -f ${JAR} ]; then
+	if [ ! -f ${BRIDGE_JAR} ] || [ ! -f ${BACKEND_JAR} ] ; then
 		app_build
 	fi
 	# Start up the dashboard
-	source ${DIR}/dashboard/dashboard.sh
+	# source ${DIR}/dashboard/dashboard.sh
 	# Hide mouse when still
 	#DISPLAY=:0 unclutter -idle 0.01 -root &
 	# Start websocket bridge, fork to background and no output
-	nohup java ${BRIDGE_JAVA_OPTS} ${JAR} --url=${WEBSOCKET_URL} --topic=${WEBSOCKET_TOPIC} --command=${GPIO_HANDLER_COMMAND} --prefix=${MEMO_PREFIX} & >/dev/null 2>&1
+  echo "${OPENNODE_API_URI}"
+	java ${BACKEND_JAVA_OPTS} ${BACKEND_JAR}
+
+  APP_EXEC_PATH="${GPIO_HANDLER_COMMAND}"
+  APP_MEMO_PREFIX="${MEMO_PREFIX}"
+	nohup java ${BRIDGE_JAVA_OPTS} ${BRIDGE_JAR} & >/dev/null 2>&1
 }
 
 # Stop all services
@@ -45,8 +55,10 @@ app_stop(){
 
 # Build or rebuild the java lighning node web bridge
 app_build(){
-	echo "Building the websocket bridge please wait"
-	cd ${DIR}/websocket_bridge && exec ./gradlew build >/dev/null 2>&1
+	echo "Building the bridge bridge please wait"
+	cd ${DIR}/beertap-bridge && ./mvnw clean package
+	echo "Building the backend bridge please wait"
+	cd ${DIR}/beertap-backend && ./mvnw clean package
 }
 
 # Argument parsing
