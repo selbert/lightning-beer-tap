@@ -28,26 +28,30 @@ app_start(){
 
 	BRIDGE_JAR=${DIR}/${BRIDGE_JARPATH}${BRIDGE_JARFILE}
 	BACKEND_JAR=${DIR}/${BACKEND_JARPATH}${BACKEND_JARFILE}
-	# Check if the websocket bridge has been built
+	# Check if the backend and websocket bridge have been built
 	if [ ! -f ${BRIDGE_JAR} ] || [ ! -f ${BACKEND_JAR} ] ; then
 		app_build
 	fi
+
+	# Start backend and websocket bridge, fork to background and no output
+  cd $DIR
+	nohup java ${BACKEND_JAVA_OPTS} ${BACKEND_JAR} & >/dev/null 2>&1
+
+	nohup java ${BRIDGE_JAVA_OPTS} ${BRIDGE_JAR} & >/dev/null 2>&1
+
+	nohup static-server ${DIR}/beertap-frontend & >/dev/null 2>&1
 	# Start up the dashboard
 	source ${DIR}/frontend-config.sh
 	source ${DIR}/dashboard/dashboard.sh
 	# Hide mouse when still
 	#DISPLAY=:0 unclutter -idle 0.01 -root &
-	# Start websocket bridge, fork to background and no output
-  cd $DIR
-	nohup java ${BACKEND_JAVA_OPTS} ${BACKEND_JAR} & >/dev/null 2>&1
-
-	nohup java ${BRIDGE_JAVA_OPTS} ${BRIDGE_JAR} & >/dev/null 2>&1
 }
 
 # Stop all services
 app_stop(){
 	echo "Killing all services..."
 	killall java
+	killall node
 	pkill -o chromium
 	killall unclutter
 }
