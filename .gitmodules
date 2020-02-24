@@ -1,9 +1,12 @@
 [submodule "beertap-bridge"]
 	path = beertap-bridge
 	url = git@github.com:puzzle/beertap-bridge.git
+	branch = master
 [submodule "beertap-frontend"]
 	path = beertap-frontend
 	url = git@github.com:puzzle/beertap-frontend.git
+	branch = master
 [submodule "beertap-backend"]
 	path = beertap-backend
 	url = git@github.com:puzzle/beertap-backend.git
+	branch = master
